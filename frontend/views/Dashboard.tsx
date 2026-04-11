@@ -9,8 +9,7 @@ import {
   Briefcase, Users, ChevronDown, Bell, Search, User,
   MessageSquare, Calculator, FileText, Zap, ArrowRight, ChevronRight,
   Sparkles, Database, BarChart2, X, ArrowUp, ArrowDown, Building2,
-  CheckCircle2, Trash2, ExternalLink, Star, Sun
-} from 'lucide-react';
+  CheckCircle2, Trash2, ExternalLink, Star, Sun, Calendar} from 'lucide-react';
 import { PricingCalculatorProvider, usePricingCalculator } from '../context/PricingCalculatorContext';
 import PricingCalculator from '../components/PricingCalculator';
 import WhatsAppMarketingModal from '../components/WhatsAppMarketingModal';
