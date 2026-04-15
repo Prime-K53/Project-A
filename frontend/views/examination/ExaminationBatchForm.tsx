@@ -2,24 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useExamination } from '../../context/ExaminationContext';
 import { useAuth } from '../../context/AuthContext';
+import { useFinance } from '../../context/FinanceContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/Dialog';
 import { ArrowLeft, Save, Plus } from 'lucide-react';
 import { Customer } from '../../types';
 import { dbService } from '../../services/db';
 import { toast } from '../../components/Toast';
+import { format, addDays } from 'date-fns';
 
 const ExaminationBatchForm: React.FC = () => {
   const navigate = useNavigate();
   const { createBatch, loadAllData, customers, loading: contextLoading } = useExamination();
-  const { companyConfig, addAuditLog } = useAuth();
+  const { companyConfig = { currencySymbol: 'MWK', pricingSettings: { defaultMethod: 'ALWAYS_UP_50', customStep: 50 } } as any, addAuditLog } = useAuth();
+  const { accounts = [] } = useFinance() as any;
   const [loading, setLoading] = useState(false);
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const defaultValidUntil = format(addDays(new Date(), 30), 'yyyy-MM-dd');
   const [formData, setFormData] = useState({
     school_id: '',
-    name: '',
     academic_year: new Date().getFullYear().toString(),
     term: '1',
     exam_type: 'Mid-Term',
-    currency: companyConfig?.currencySymbol || 'MWK',
+    batch_date: today,
+    valid_until: defaultValidUntil,
+    sales_account_id: '',
     sub_account_name: ''
   });
 
@@ -192,19 +198,128 @@ const ExaminationBatchForm: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">School / Client</label>
-                <button
-                  type="button"
-                  onClick={() => setShowAddCustomer(true)}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                >
-                  <Plus size={12} />
-                  Add New
-                </button>
-              </div>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             <div>
+               <div className="flex items-center justify-between mb-1.5">
+                 <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">School / Client</label>
+                 <button
+                   type="button"
+                   onClick={() => setShowAddCustomer(true)}
+                   className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
+                 >
+                   <Plus size={12} />
+                   Add New
+                 </button>
+               </div>
+               <select
+                 value={formData.school_id}
+                 onChange={(event) => handleChange('school_id', event.target.value)}
+                 required
+                 disabled={contextLoading && sortedCustomers.length === 0}
+                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+               >
+                 <option value="">
+                   {contextLoading && sortedCustomers.length === 0 ? 'Loading customers...' : 'Select customer'}
+                 </option>
+                 {sortedCustomers.map((customer) => (
+                   <option key={customer.id} value={customer.id}>
+                     {customer.name}
+                   </option>
+                 ))}
+               </select>
+             </div>
+ 
+             {selectedCustomerFull && selectedCustomerFull.subAccounts && selectedCustomerFull.subAccounts.length > 0 ? (
+               <div>
+                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                   Sub Account
+                 </label>
+                 <select
+                   value={formData.sub_account_name}
+                   onChange={(event) => handleChange('sub_account_name', event.target.value)}
+                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+                 >
+                   <option value="">Select sub-account (or leave for main account)</option>
+                   {selectedCustomerFull.subAccounts.map((sub: any) => (
+                     <option key={sub.id} value={sub.name}>
+                       {sub.name}
+                     </option>
+                   ))}
+                 </select>
+               </div>
+             ) : (
+               <div>
+                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Creation Date</label>
+                 <input
+                   type="date"
+                   value={formData.batch_date}
+                   onChange={(event) => handleChange('batch_date', event.target.value)}
+                   required
+                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+                 />
+               </div>
+             )}
+ 
+             <div>
+               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Valid Until</label>
+               <input
+                 type="date"
+                 value={formData.valid_until}
+                 onChange={(event) => handleChange('valid_until', event.target.value)}
+                 required
+                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+               />
+             </div>
+ 
+             <div>
+               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Academic Year</label>
+               <input
+                 value={formData.academic_year}
+                 onChange={(event) => handleChange('academic_year', event.target.value)}
+                 placeholder="e.g. 2026"
+                 required
+                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+               />
+             </div>
+ 
+             <div>
+               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Term</label>
+               <select
+                 value={formData.term}
+                 onChange={(event) => handleChange('term', event.target.value)}
+                 required
+                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+               >
+                 <option value="1">Term 1</option>
+                 <option value="2">Term 2</option>
+                 <option value="3">Term 3</option>
+               </select>
+             </div>
+ 
+             <div>
+               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Exam Type</label>
+               <select
+                 value={formData.exam_type}
+                 onChange={(event) => handleChange('exam_type', event.target.value)}
+                 required
+                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+               >
+                 <option value="Mid-Term">Mid-Term</option>
+                 <option value="End-of-Term">End-of-Term</option>
+                 <option value="Mock">Mock</option>
+                 <option value="Assessment">Assessment</option>
+               </select>
+             </div>
+ 
+             {/* Sales Account field - hidden but kept for functionality */}
+             <div className="hidden">
+               <input
+                 type="hidden"
+                 value={formData.sales_account_id}
+                 onChange={(event) => handleChange('sales_account_id', event.target.value)}
+               />
+             </div>
+           </div>
               <select
                 value={formData.school_id}
                 onChange={(event) => handleChange('school_id', event.target.value)}
@@ -223,35 +338,29 @@ const ExaminationBatchForm: React.FC = () => {
               </select>
             </div>
 
-            {selectedCustomerFull && selectedCustomerFull.subAccounts && selectedCustomerFull.subAccounts.length > 0 ? (
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
-                  Sub Account
-                </label>
-                <select
-                  value={formData.sub_account_name}
-                  onChange={(event) => handleChange('sub_account_name', event.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
-                >
-                  <option value="">Select sub-account (or leave for main account)</option>
-                  {selectedCustomerFull.subAccounts.map((sub: any) => (
-                    <option key={sub.id} value={sub.name}>
-                      {sub.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div>
-                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Currency</label>
-                <input
-                  value={formData.currency}
-                  onChange={(event) => handleChange('currency', event.target.value)}
-                  disabled
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 outline-none"
-                />
-              </div>
-            )}
+{selectedCustomerFull && selectedCustomerFull.subAccounts && selectedCustomerFull.subAccounts.length > 0 ? (
+               <div>
+                 <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">
+                   Sub Account
+                 </label>
+                 <select
+                   value={formData.sub_account_name}
+                   onChange={(event) => handleChange('sub_account_name', event.target.value)}
+                   className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-300"
+                 >
+                   <option value="">Select sub-account (or leave for main account)</option>
+                   {selectedCustomerFull.subAccounts.map((sub: any) => (
+                     <option key={sub.id} value={sub.name}>
+                       {sub.name}
+                     </option>
+                   ))}
+                 </select>
+               </div>
+             ) : (
+               <>
+                 {/* Currency removed as requested */}
+               </>
+             )}
 
             <div>
               <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wide mb-1.5">Batch Name</label>
