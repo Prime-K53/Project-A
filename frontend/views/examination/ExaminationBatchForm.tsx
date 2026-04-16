@@ -124,7 +124,13 @@ const ExaminationBatchForm: React.FC = () => {
         toast.info('Customers are still loading. Please wait a moment and try again.');
         return;
       }
-      toast.error('Please select a school or customer from the list');
+      toast.error('Please select a valid school from the list');
+      return;
+    }
+
+    const schoolExists = customers.some((c) => String(c.id) === String(schoolId));
+    if (!schoolExists) {
+      toast.error('Please select a valid school from the list');
       return;
     }
     if (!academicYear) {
@@ -160,7 +166,8 @@ const ExaminationBatchForm: React.FC = () => {
       toast.error(errorMessage);
       
       // Additional user guidance based on common errors
-      if (errorMessage.includes('School ID') || errorMessage.includes('required')) {
+      const lowerMsg = errorMessage.toLowerCase();
+      if (lowerMsg.includes('school id') || lowerMsg.includes('school') || lowerMsg.includes('required')) {
         toast.error('Please ensure a valid school is selected.');
       }
     } finally {
