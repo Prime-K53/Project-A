@@ -503,13 +503,25 @@ const requestWithFallback = async (
 };
 
 const createBatchRemote = async (payload: Partial<ExaminationBatch>) => {
+  const mappedPayload = {
+    ...payload,
+    customerId: payload.school_id,
+    name: payload.batch_number || payload.batchNumber,
+  };
+  console.log('[DEBUG] createBatchRemote - mapped payload:', JSON.stringify(mappedPayload, null, 2));
   const response = await fetchWithTimeout('/batches', {
     method: 'POST',
     headers: getHeaders(),
-    body: JSON.stringify(payload),
+    body: JSON.stringify(mappedPayload),
   }, CREATE_REQUEST_TIMEOUT_MS);
   if (!response.ok) throw new Error(await toServiceError(response, 'Failed to create batch'));
-  return safeJson(response, 'createBatch');
+  const result = await safeJson(response, 'createBatch');
+  return {
+    ...result,
+    school_id: result.customerId,
+    batch_number: result.name,
+    batchNumber: result.name,
+  };
 };
 
 const updateBatchRemote = async (id: string, payload: Partial<ExaminationBatch>) => {

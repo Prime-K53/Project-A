@@ -124,13 +124,7 @@ const ExaminationBatchForm: React.FC = () => {
         toast.info('Customers are still loading. Please wait a moment and try again.');
         return;
       }
-      toast.error('Please select a valid school from the list');
-      return;
-    }
-
-    const schoolExists = customers.some((c) => String(c.id) === String(schoolId));
-    if (!schoolExists) {
-      toast.error('Please select a valid school from the list');
+      toast.error('Please select a school from the dropdown');
       return;
     }
     if (!academicYear) {
@@ -149,7 +143,7 @@ const ExaminationBatchForm: React.FC = () => {
         rounding_value: Number(companyConfig?.pricingSettings?.customStep || 50)
       };
 
-      console.log('Submitting batch payload:', payload);
+      console.log('[DEBUG] Submitting batch payload:', JSON.stringify(payload, null, 2));
 
       const newBatch = await Promise.race([
         createBatch(payload),
@@ -164,12 +158,6 @@ const ExaminationBatchForm: React.FC = () => {
       console.error('Failed to create batch:', error);
       const errorMessage = error?.message || 'Failed to create examination batch. Please try again.';
       toast.error(errorMessage);
-      
-      // Additional user guidance based on common errors
-      const lowerMsg = errorMessage.toLowerCase();
-      if (lowerMsg.includes('school id') || lowerMsg.includes('school') || lowerMsg.includes('required')) {
-        toast.error('Please ensure a valid school is selected.');
-      }
     } finally {
       setLoading(false);
     }
