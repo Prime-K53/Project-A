@@ -460,18 +460,26 @@ const WorkOrders: React.FC = () => {
                                                     )}
                                                 </div>
                                                 <div className="flex flex-wrap gap-2 mt-1">
-                                                    {wo.attributes && Object.entries(wo.attributes).map(([key, value]) => (
-                                                        key !== 'variantId' && (
+                                                    {wo.attributes && Object.entries(wo.attributes).map(([key, value]) => {
+                                                        if (key === 'variantId') return null;
+                                                        const label = key === 'batch_number' ? 'Batch' : key;
+                                                        return (
                                                             <span key={key} className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-bold uppercase tracking-tight border border-slate-200">
-                                                                {key}: {String(value)}
+                                                                {label}: {String(value)}
                                                             </span>
-                                                        )
-                                                    ))}
+                                                        );
+                                                    })}
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                     <span className="font-mono text-slate-400 font-bold text-[10px] uppercase tracking-tight">#{wo.id}</span>
                                                     <span className="text-slate-300 text-[10px]">•</span>
-                                                    <span className="text-slate-500 font-bold text-[10px] uppercase tracking-tight">{wo.customerName || 'Stock Build'}</span>
+                                                    <span className="text-slate-500 font-bold text-[10px] uppercase tracking-tight">{isExamination 
+                                                        ? (() => {
+                                                            const customer = (customers || []).find(c => c.id === wo.customerId);
+                                                            return customer?.name || wo.customerName || 'Unknown School';
+                                                        })()
+                                                        : (wo.customerName || 'Stock Build')
+                                                    }</span>
                                                 </div>
                                             </td>
                                             <td className="table-body-cell px-4 py-2 text-center">
