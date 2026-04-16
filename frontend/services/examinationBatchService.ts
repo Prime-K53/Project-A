@@ -666,6 +666,19 @@ export const examinationBatchService = {
         headers: getHeaders()
       }, REQUEST_TIMEOUT_MS);
       if (!response.ok) {
+        // Try batch number lookup if batch not found
+        if (response.status === 404) {
+          const local = await getLocalBatches();
+          const localBatch = local.find(batch => String(batch.id) === String(id));
+          if (localBatch?.batch_number) {
+            console.log('[DEBUG] examinationBatchService.getBatch - Batch ID not found, trying batch number lookup:', { id, batchNumber: localBatch.batch_number });
+            const foundByNumber = await this.getBatchByNumber(localBatch.batch_number);
+            if (foundByNumber?.id) {
+              console.log('[DEBUG] examinationBatchService.getBatch - Found batch by number:', { oldId: id, newId: foundByNumber.id });
+              return this.getBatch(foundByNumber.id);
+            }
+          }
+        }
         const errorMsg = await toServiceError(response, 'Failed to fetch batch');
         console.error('[DEBUG] examinationBatchService.getBatch - API Error:', {
           id,

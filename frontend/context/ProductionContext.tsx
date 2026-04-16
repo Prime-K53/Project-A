@@ -76,16 +76,17 @@ export const ProductionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     useEffect(() => {
         if (typeof window === 'undefined') return;
 
-        const handleExaminationBatchToProduction = async (event: CustomEvent) => {
-            const { workOrder } = event.detail;
+const handleExaminationBatchToProduction = async (event: CustomEvent) => {
+            const { workOrder, batch } = event.detail;
             if (workOrder) {
                 try {
                     await storeAddWorkOrder(workOrder);
                     
-                    // Clean up product name: replace "Unknown School" with actual customer name
+                    // Clean up product name: replace "Unknown School" with actual customer name from batch
                     let productName = workOrder.productName;
-                    if (workOrder.customerName && productName.includes('Unknown School')) {
-                        productName = productName.replace('Unknown School', workOrder.customerName);
+                    const customerName = batch?.schoolName || workOrder.customerName;
+                    if (customerName && productName.includes('Unknown School')) {
+                        productName = productName.replace('Unknown School', customerName);
                     }
                     
                     notify(`Examination work order created: ${productName}`, 'success');
