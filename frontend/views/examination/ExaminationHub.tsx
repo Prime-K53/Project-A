@@ -617,25 +617,25 @@ const ExaminationHub: React.FC = () => {
           <div className="bg-white/90 rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm">
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left text-[13px]">
-                <thead className="bg-slate-50/80 backdrop-blur text-slate-500 sticky top-0 z-10 shadow-sm">
-                   <tr>
-                     <th className="table-header w-12 px-2 text-center">
-                       <input
-                         type="checkbox"
-                         checked={selectedBatchIds.size === filteredBatches.length && filteredBatches.length > 0}
-                         onChange={toggleSelectAll}
-                         className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                       />
-                     </th>
-                     <th className="table-header w-32">Batch #</th>
-                     <th className="table-header">School</th>
-                     <th className="table-header w-28">Exam Type</th>
-                     <th className="table-header w-32">Academic</th>
-                     <th className="table-header w-20 text-right">Classes</th>
-                     <th className="table-header w-32 text-right">Amount</th>
-                     <th className="table-header w-24">Status</th>
-                     <th className="table-header w-12 text-right">Action</th>
-                   </tr>
+<thead className="bg-slate-50/80 backdrop-blur text-slate-500 sticky top-0 z-10 shadow-sm">
+                  <tr>
+                      <th className="table-header w-10 px-1 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedBatchIds.size === filteredBatches.length && filteredBatches.length > 0}
+                          onChange={toggleSelectAll}
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        />
+                      </th>
+                      <th className="table-header flex-1 min-w-[100px]">Batch</th>
+                      <th className="table-header flex-1 min-w-[140px]">School</th>
+                      <th className="table-header flex-1 min-w-[90px]">Exam Type</th>
+                      <th className="table-header flex-1 min-w-[100px]">Academic</th>
+                      <th className="table-header flex-1 min-w-[70px] text-right">Classes</th>
+                      <th className="table-header flex-1 min-w-[100px] text-right">Amount</th>
+                      <th className="table-header flex-1 min-w-[80px]">Status</th>
+                      <th className="table-header w-10 text-right">Action</th>
+                    </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100/50">
                   {filteredBatches.map((batch) => {
@@ -652,7 +652,7 @@ const ExaminationHub: React.FC = () => {
                           setOpenMenuId(batch.id);
                         }}
                       >
-                        <td className="table-body-cell px-2">
+<td className="table-body-cell w-10 px-1">
                           <input
                             type="checkbox"
                             checked={selectedBatchIds.has(batch.id)}
@@ -660,35 +660,30 @@ const ExaminationHub: React.FC = () => {
                             className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                           />
                         </td>
-                        <td className="table-body-cell">
+                        <td className="table-body-cell flex-1 min-w-[100px]">
                           <div className="font-semibold text-slate-900 font-mono">{batchReference || batch.id}</div>
-                          {batch.type === 'Patch' && (
-                            <span className="inline-flex items-center rounded-lg px-2 py-0.5 text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-100 mt-1">
-                              Patch
-                            </span>
-                          )}
                         </td>
-                        <td className="table-body-cell text-slate-600">
+                        <td className="table-body-cell flex-1 min-w-[140px] text-slate-600">
                           {schoolName}
                           {batch.sub_account_name && <span className="text-slate-400 ml-1">({batch.sub_account_name})</span>}
                         </td>
-                        <td className="table-body-cell text-slate-700">{batch.exam_type}</td>
-                        <td className="table-body-cell text-slate-600">{batch.academic_year} Term {batch.term}</td>
-                        <td className="table-body-cell text-right finance-nums text-slate-700">{getBatchClassCount(batch)}</td>
-                        <td className="table-body-cell text-right font-semibold finance-nums text-slate-900">
+                        <td className="table-body-cell flex-1 min-w-[90px] text-slate-700">{batch.exam_type}</td>
+                        <td className="table-body-cell flex-1 min-w-[100px] text-slate-600">{batch.academic_year} Term {batch.term}</td>
+                        <td className="table-body-cell flex-1 min-w-[70px] text-right finance-nums text-slate-700">{getBatchClassCount(batch)}</td>
+                        <td className="table-body-cell flex-1 min-w-[100px] text-right font-semibold finance-nums text-slate-900">
                           {batch.currency || companyConfig?.currencySymbol || 'MWK'}
                           {(batch.total_amount || 0).toLocaleString(undefined, {
                             minimumFractionDigits: 0,
                             maximumFractionDigits: 2
                           })}
                         </td>
-                        <td className="table-body-cell">
+                        <td className="table-body-cell flex-1 min-w-[80px]">
                           <span className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-semibold ${statusConfig.badgeClass}`}>
                             {statusConfig.icon}
                             {batch.status}
                           </span>
                         </td>
-                        <td className="table-body-cell text-right">
+                        <td className="table-body-cell w-10 text-right">
                           <div className="relative">
                             <button
                               type="button"
