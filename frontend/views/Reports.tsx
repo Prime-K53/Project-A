@@ -350,24 +350,6 @@ const Reports: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Top Navigation Tabs */}
-                <div className="flex gap-2">
-                    <div className="flex p-1 bg-slate-100/80 rounded-xl overflow-hidden self-start">
-                        {NAV_ITEMS.map(item => (
-                            <button
-                                key={item.id}
-                                onClick={() => setActiveCategory(item.id as any)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${activeCategory === item.id
-                                    ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5 scale-[1.02]'
-                                    : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
-                                    }`}
-                            >
-                                <item.icon size={16} className={activeCategory === item.id ? 'stroke-[2.5px]' : ''} />
-                                {item.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
             </div>
 
             <div id="report-content" className="flex-1 min-h-0 overflow-y-auto p-6 custom-scrollbar bg-slate-50/50">

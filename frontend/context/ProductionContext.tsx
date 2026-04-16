@@ -81,12 +81,19 @@ export const ProductionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
             if (workOrder) {
                 try {
                     await storeAddWorkOrder(workOrder);
-                    notify(`Examination work order created: ${workOrder.productName}`, 'success');
+                    
+                    // Clean up product name: replace "Unknown School" with actual customer name
+                    let productName = workOrder.productName;
+                    if (workOrder.customerName && productName.includes('Unknown School')) {
+                        productName = productName.replace('Unknown School', workOrder.customerName);
+                    }
+                    
+                    notify(`Examination work order created: ${productName}`, 'success');
                     addAuditLog({
                         action: 'CREATE',
                         entityType: 'WorkOrder',
                         entityId: workOrder.id,
-                        details: `Examination batch work order created: ${workOrder.productName}`,
+                        details: `Examination batch work order created: ${productName}`,
                         newValue: workOrder
                     });
                 } catch (error) {
